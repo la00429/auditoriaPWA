@@ -1,0 +1,43 @@
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Builds and coverage
+build/
+dist/
+coverage/
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local environment and secrets
+.env
+.env.*
+*.pem
+server/vapid.json
+
+# IDE and OS files
+.DS_Store
+DS_Store
+.idea/
+.vscode/
+*.iml
+Thumbs.db
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Test and runtime validation artifacts
+.tsupgrader/runtime-validation/evidence/
+.tsupgrader/runtime-validation/test-results/
+.tsupgrader/runtime-validation/playwright-report/
+.tsupgrader/runtime-validation/recording-requests/
+.tsupgrader/runtime-validation/.playwright-cli/
