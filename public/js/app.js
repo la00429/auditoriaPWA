@@ -15,10 +15,16 @@ var installBanner = document.getElementById('install-banner');
 var installAppBtn = document.getElementById('install-app-btn');
 var installDismissBtn = document.getElementById('install-dismiss-btn');
 
+if (sessionStorage.getItem('chat-pwa-installed') === 'true' && installBanner) {
+    installBanner.classList.add('oculto');
+}
+
 window.addEventListener('beforeinstallprompt', function(event) {
     event.preventDefault();
     deferredInstallPrompt = event;
-    if (installBanner) installBanner.classList.remove('oculto');
+    if (installBanner && sessionStorage.getItem('chat-pwa-installed') !== 'true') {
+        installBanner.classList.remove('oculto');
+    }
 });
 
 if (installAppBtn) {
@@ -40,6 +46,7 @@ if (installDismissBtn) {
 
 window.addEventListener('appinstalled', function() {
     deferredInstallPrompt = null;
+    sessionStorage.setItem('chat-pwa-installed', 'true');
     if (installBanner) installBanner.classList.add('oculto');
 });
 

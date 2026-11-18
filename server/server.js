@@ -34,17 +34,19 @@ app.use('/api', routes );
 
 
 
-app.listen(port, '0.0.0.0', (err) => {
+if (require.main === module) {
+    app.listen(port, '0.0.0.0', (err) => {
+        if (err) throw new Error(err);
 
-    if (err) throw new Error(err);
-
-    console.log(`Servidor corriendo en puerto ${ port }`);
-    Object.keys(os.networkInterfaces()).forEach(function(interfaz) {
-        os.networkInterfaces()[interfaz].forEach(function(direccion) {
-            if (direccion.family === 'IPv4' && !direccion.internal) {
-                console.log(`Red local: http://${direccion.address}:${port}`);
-            }
+        console.log(`Servidor corriendo en puerto ${ port }`);
+        Object.keys(os.networkInterfaces()).forEach(function(interfaz) {
+            os.networkInterfaces()[interfaz].forEach(function(direccion) {
+                if (direccion.family === 'IPv4' && !direccion.internal) {
+                    console.log(`Red local: http://${direccion.address}:${port}`);
+                }
+            });
         });
     });
+}
 
-});
+module.exports = app;
