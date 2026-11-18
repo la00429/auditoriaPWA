@@ -3,15 +3,18 @@ const fs = require('fs');
 
 
 const urlsafeBase64 = require('urlsafe-base64');
-const vapid = require('./vapid.json');
-
 const webpush = require('web-push');
+const vapidPath = './vapid.json';
+let vapid = null;
 
-webpush.setVapidDetails(
-    'mailto:fernando.herrera85@gmail.com',
-    vapid.publicKey,
-    vapid.privateKey
-  );
+if (fs.existsSync(__dirname + '/vapid.json')) {
+    vapid = require(vapidPath);
+    webpush.setVapidDetails(
+        'mailto:fernando.herrera85@gmail.com',
+        vapid.publicKey,
+        vapid.privateKey
+    );
+}
 
 
 
@@ -20,7 +23,8 @@ let suscripciones = require('./subs-db.json');
 
 
 module.exports.getKey = () => {
-    return urlsafeBase64.decode( vapid.publicKey );
+    if (!vapid || !vapid.publicKey) return null;
+    return urlsafeBase64.decode(vapid.publicKey);
 };
 
 
@@ -35,6 +39,10 @@ module.exports.addSubscription = ( suscripcion ) => {
 
 
 module.exports.sendPush = ( post ) => {
+    if (!vapid) {
+        console.warn('Push deshabilitado: falta server/vapid.json');
+        return;
+    }
 
     console.log('Mandando PUSHES');
 

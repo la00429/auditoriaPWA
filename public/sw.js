@@ -5,7 +5,7 @@ importScripts('js/sw-db.js');
 importScripts('js/sw-utils.js');
 
 
-const STATIC_CACHE    = 'static-v4';
+const STATIC_CACHE    = 'static-v5';
 const DYNAMIC_CACHE   = 'dynamic-v1';
 const INMUTABLE_CACHE = 'inmutable-v1';
 
@@ -22,7 +22,9 @@ const APP_SHELL = [
     'img/avatars/thor.jpg',
     'img/avatars/wolverine.jpg',
     'js/app.js',
+    'js/rum.js',
     'js/camara-class.js',
+    'vendor/web-vitals.iife.js',
     'js/sw-utils.js',
     'js/libs/plugins/mdtoast.min.js',
     'js/libs/plugins/mdtoast.min.css',

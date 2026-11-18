@@ -35,7 +35,7 @@ class Camara {
 
     tomarFoto() {
         if (!this.stream) {
-            throw new Error('La cámara no está activa.');
+            return Promise.reject(new Error('La cámara no está activa.'));
         }
 
         var canvas = document.createElement('canvas');
@@ -43,9 +43,17 @@ class Camara {
         canvas.height = 300;
         var context = canvas.getContext('2d');
         context.drawImage(this.videoNode, 0, 0, canvas.width, canvas.height);
-        var foto = canvas.toDataURL('image/png');
-        canvas.remove();
-        return foto;
+
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(function(blob) {
+                canvas.remove();
+                if (!blob) {
+                    reject(new Error('No se pudo procesar la foto.'));
+                    return;
+                }
+                resolve(blob);
+            }, 'image/webp', 0.82);
+        });
     }
 
     iniciarGrabacionWebM() {

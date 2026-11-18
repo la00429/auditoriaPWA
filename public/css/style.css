@@ -45,6 +45,57 @@ button {
   display: none !important;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.icono-encabezado {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: white;
+  font-size: 1.15em;
+}
+
+.install-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #2c3e50;
+  color: white;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
+}
+
+.install-banner span {
+  flex: 1;
+}
+
+.install-banner button {
+  width: auto;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: #3498db;
+}
+
 .capacidades-panel {
   margin: 5.5em 12px 1em;
   padding: 14px;
@@ -147,6 +198,8 @@ button {
 .face-scanner video {
   display: block;
   width: 100%;
+  height: 300px;
+  aspect-ratio: 1 / 1;
   max-height: 300px;
   object-fit: cover;
   border-radius: 5px;
@@ -181,6 +234,8 @@ button {
 .barcode-scanner video {
   display: block;
   width: 100%;
+  height: 300px;
+  aspect-ratio: 1 / 1;
   max-height: 300px;
   object-fit: cover;
   border-radius: 5px;
@@ -275,6 +330,9 @@ button {
 
 .seleccion-avatar {
   width: 150px;
+  height: 150px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   -webkit-border-radius: 50%;
   -moz-border-radius: 50%;
   -ms-border-radius: 50%;
@@ -287,10 +345,29 @@ button {
 /* Camera */
 .camara-contenedor {
   width: 100%;
+  min-height: 470px;
+  aspect-ratio: 4 / 5;
   padding: 20px;
   border-radius: 10px;
   overflow: hidden;
   border: 5px solid white;
+}
+
+#player,
+#video-result {
+  display: block;
+  width: 300px;
+  max-width: 100%;
+  height: 300px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: #1f2d3d;
+}
+
+#video-result {
+  height: 200px;
+  aspect-ratio: 16 / 10;
+  margin: 10px auto;
 }
 
 .camara-contenedor button {
@@ -307,6 +384,8 @@ button {
 .foto-mensaje {
   width: 150px;
   height: 150px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
 }
 
 .video-mensaje {
@@ -517,6 +596,9 @@ textarea {
 
     .avatar img {
       width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
       -webkit-border-radius: 50%;
       -moz-border-radius: 50%;
       -ms-border-radius: 50%;

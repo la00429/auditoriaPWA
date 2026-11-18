@@ -4,6 +4,45 @@ var swLocation = '/sw.js';
 
 var swReg;
 
+function marcarAccionRum(elemento) {
+    if (window.PWA_RUM && typeof window.PWA_RUM.markAction === 'function') {
+        window.PWA_RUM.markAction(elemento || 'chat');
+    }
+}
+
+var deferredInstallPrompt = null;
+var installBanner = document.getElementById('install-banner');
+var installAppBtn = document.getElementById('install-app-btn');
+var installDismissBtn = document.getElementById('install-dismiss-btn');
+
+window.addEventListener('beforeinstallprompt', function(event) {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (installBanner) installBanner.classList.remove('oculto');
+});
+
+if (installAppBtn) {
+    installAppBtn.addEventListener('click', function() {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(function() {
+            deferredInstallPrompt = null;
+            if (installBanner) installBanner.classList.add('oculto');
+        });
+    });
+}
+
+if (installDismissBtn) {
+    installDismissBtn.addEventListener('click', function() {
+        if (installBanner) installBanner.classList.add('oculto');
+    });
+}
+
+window.addEventListener('appinstalled', function() {
+    deferredInstallPrompt = null;
+    if (installBanner) installBanner.classList.add('oculto');
+});
+
 if ( navigator.serviceWorker ) {
 
 
@@ -110,7 +149,7 @@ function crearMensajeHTML(mensaje, personaje, lat, lng, foto, video) {
 
 
         <div class="avatar">
-            <img src="img/avatars/${ personaje }.jpg">
+            <img src="img/avatars/${ personaje }.jpg" alt="Avatar de ${ escapeHtml(personaje) }" width="60" height="60" loading="lazy">
         </div>
         <div class="bubble-container">
             <div class="bubble">
@@ -126,7 +165,7 @@ function crearMensajeHTML(mensaje, personaje, lat, lng, foto, video) {
     if ( foto ) {
         content += `
                 <br>
-                <img class="foto-mensaje" src="${ foto }">
+                <img class="foto-mensaje" src="${ foto }" alt="Foto enviada por ${ escapeHtml(personaje) }" width="150" height="150" loading="lazy">
         `;
     }
 
@@ -174,7 +213,7 @@ function crearMensajeMapa(lat, lng, personaje) {
         data-lat="${ lat }"
         data-lng="${ lng }">
                 <div class="avatar">
-                    <img src="img/avatars/${ personaje }.jpg">
+                    <img src="img/avatars/${ personaje }.jpg" alt="Avatar de ${ escapeHtml(personaje) }" width="60" height="60" loading="lazy">
                 </div>
                 <div class="bubble-container">
                     <div class="bubble">
@@ -300,35 +339,41 @@ postBtn.on('click', function() {
         cancelarBtn.click();
         return;
     }
+    marcarAccionRum('btn-post-mensaje');
+    postBtn.prop('disabled', true).addClass('procesando');
 
-    blobComoDataUrl(videoGrabado).then(function(video) {
-        var data = {
-            mensaje: mensaje,
-            user: usuario,
-            lat: lat,
-            lng: lng,
-            foto: foto,
-            video: video
-        };
+    requestAnimationFrame(function() {
+        blobComoDataUrl(videoGrabado).then(function(video) {
+            var data = {
+                mensaje: mensaje,
+                user: usuario,
+                lat: lat,
+                lng: lng,
+                foto: foto,
+                video: video
+            };
 
-        return fetch('api', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        }).then(function(res) {
-            if (!res.ok) throw new Error('El servidor rechazó el mensaje.');
-            return res.json();
-        }).then(function() {
-            crearMensajeHTML(mensaje, usuario, lat, lng, foto, video);
-            foto = null;
-            videoGrabado = null;
-            detenerSeguimientoUbicacion();
-            camara.apagar();
+            return fetch('api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(function(res) {
+                if (!res.ok) throw new Error('El servidor rechazó el mensaje.');
+                return res.json();
+            }).then(function() {
+                crearMensajeHTML(mensaje, usuario, lat, lng, foto, video);
+                foto = null;
+                videoGrabado = null;
+                detenerSeguimientoUbicacion();
+                camara.apagar();
+            });
+        }).catch(function(error) {
+            mostrarAviso('No se pudo enviar el mensaje: ' + error.message, 'warning');
+        }).finally(function() {
+            postBtn.prop('disabled', false).removeClass('procesando');
         });
-    }).catch(function(error) {
-        mostrarAviso('No se pudo enviar el mensaje: ' + error.message, 'warning');
     });
 });
 
@@ -624,6 +669,7 @@ function iniciarSeguimientoUbicacion() {
 }
 
 function obtenerUbicacion() {
+    marcarAccionRum('btn-obtener-ubicacion');
     if (!geolocalizacionDisponible()) return;
     if (geolocalizacionEnCurso) {
         mostrarAviso('Ya se está solicitando la ubicación.', 'info');
@@ -678,6 +724,7 @@ btnLocation.on('click', obtenerUbicacion);
 cancelarBtn.on('click', detenerSeguimientoUbicacion);
 
 btnPhoto.on('click', function() {
+    marcarAccionRum('btn-activar-camara');
     contenedorCamara.removeClass('oculto');
     camara.encender().catch(function(error) {
         mostrarAviso('No se pudo activar la cámara: ' + error.message, 'warning');
@@ -686,12 +733,18 @@ btnPhoto.on('click', function() {
 });
 
 btnTomarFoto.on('click', function() {
-    try {
-        foto = camara.tomarFoto();
+    marcarAccionRum('btn-tomar-foto');
+    btnTomarFoto.prop('disabled', true);
+    camara.tomarFoto().then(function(blob) {
+        return blobComoDataUrl(blob);
+    }).then(function(dataUrl) {
+        foto = dataUrl;
         mostrarAviso('Foto capturada. Puedes continuar grabando el video.', 'info');
-    } catch (error) {
+    }).catch(function(error) {
         mostrarAviso('No se pudo tomar la foto: ' + error.message, 'warning');
-    }
+    }).finally(function() {
+        btnTomarFoto.prop('disabled', false);
+    });
 });
 
 iniciarCamaraBtn.on('click', function() {
